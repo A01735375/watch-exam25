@@ -23,7 +23,7 @@ defmodule JswatchWeb.ClockManager do
     Process.send_after(self(), :working_working, 1000)
     GenServer.cast(ui, {:set_time_display, Time.truncate(time, :second) |> Time.to_string })
     GenServer.cast(ui, {:set_date_display, format_date(date, true, Day) })
-    {:ok, %{ui_pid: ui, time: time, date: date, alarm: alarm, st1: Working, st2: Idle}}
+    {:ok, %{ui_pid: ui, time: time, date: date, alarm: alarm, st1: Working, st2: Idle, count: 0, selection: Day, show: true}}
   end
 
   def handle_info(:working_working, %{ui_pid: ui, time: time, alarm: alarm, st1: Working} = state) do
