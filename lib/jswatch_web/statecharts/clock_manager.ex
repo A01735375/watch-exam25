@@ -37,7 +37,7 @@ defmodule JswatchWeb.ClockManager do
   end
 
   #Changes state when bottom right button is pressed and date is in Idle
-  def handle_info(:bottom_right_pressed, %{st2: Idle} = state) do
+  def handle_info(:bottom_right_pressed, %{ui_pid: ui, date: date, st2: Idle} = state) do
     state = %{
       state
       | st1: Stopped,
@@ -51,23 +51,24 @@ defmodule JswatchWeb.ClockManager do
     {:no_reply, state}
   end
 
-  def handle_info(:bottom_right_pressed, %{st2: Editing, count: 0} = state) do
-    if selection == Day do
-      new_selection = Month
+  def handle_info(:bottom_right_pressed, %{ui_pid: ui, date: date, st2: Editing, count: 0, selection: selection} = state) do
+    selection = if Day do
+      Month
     end
-    else if selection == Month do
-      new_selection = Year
+    selection = if Month do
+      Year
     end
-    else if selection == Year do
-      new_selection = Day
+    selection = if Year do
+      Day
     end
     state = %{
       state
       | count: 0,
         show: true,
-        selection: new_selection
+        selection: selection
     }
-
+    GenServer.cast(ui, {:set_date_display, format_date(date, true, selection)})
+    {:noreply, state}
   end
 
   def handle_info(_event, state), do: {:noreply, state}
