@@ -92,5 +92,24 @@ defmodule JswatchWeb.ClockManager do
     {:noreply, %{state | count: count, show: show}}
   end
 
+  def handle_info(:bottom_left_pressed, %{ui_pid: ui, st2: Editing, count: 0, selection: Day, date: date} = state) do
+    date = Date.add(date.day)
+    GenServer.cast(ui, {:set_date_display, format_date(date, true, Day)})
+    {:noreply, %{state | date:  date, show: true}}
+  end
+
+  def handle_info(:bottom_left_pressed, %{ui_pid: ui, st2: Editing, count: 0, selection: Month, date: date} = state) do
+    {}
+    date = Date.add(date.day)
+    GenServer.cast(ui, {:set_date_display, format_date(date, true, Month)})
+    {:noreply, %{state | date:  date, show: true}}
+  end
+
+  def handle_info(:bottom_left_pressed, %{ui_pid: ui, st2: Editing, count: 0, selection: Year, date: date} = state) do
+    date = Date.add(date.day)
+    GenServer.cast(ui, {:set_date_display, format_date(date, true, Year)})
+    {:noreply, %{state | date:  date, show: true}}
+  end
+
   def handle_info(_event, state), do: {:noreply, state}
 end
