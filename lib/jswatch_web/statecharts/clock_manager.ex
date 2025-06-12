@@ -36,5 +36,22 @@ defmodule JswatchWeb.ClockManager do
     {:noreply, state |> Map.put(:time, time) }
   end
 
+  def handle_info(:bottom_right_pressed, %{st2: Idle} = state) do
+    state = %{
+      state
+      | st1: Stopped,
+      st2: Editing,
+      count: 0,
+      selection: Day,
+      show: false
+    }
+
+    GenServer.cast(ui, {:set_date_display, format_date(date, false, Day)})
+    {:no_reply, state}
+  end
+
+  def handle_info(:bottom_right_pressed, %{st2: Editing, count: 0} = state) do
+  end
+
   def handle_info(_event, state), do: {:noreply, state}
 end
