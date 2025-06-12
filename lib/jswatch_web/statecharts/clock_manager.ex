@@ -51,24 +51,45 @@ defmodule JswatchWeb.ClockManager do
     {:no_reply, state}
   end
 
-  def handle_info(:bottom_right_pressed, %{ui_pid: ui, date: date, st2: Editing, count: 0, selection: selection} = state) do
-    selection = if Day do
-      Month
-    end
-    selection = if Month do
-      Year
-    end
-    selection = if Year do
-      Day
-    end
+  def handle_info(:bottom_right_pressed, %{ui_pid: ui, date: date, st2: Editing, count: 0, selection: Day} = state) do
     state = %{
       state
       | count: 0,
         show: true,
-        selection: selection
+        selection: Month
     }
-    GenServer.cast(ui, {:set_date_display, format_date(date, true, selection)})
+    GenServer.cast(ui, {:set_date_display, format_date(date, true, Month)})
     {:noreply, state}
+  end
+
+  def handle_info(:bottom_right_pressed, %{ui_pid: ui, date: date, st2: Editing, count: 0, selection: Month} = state) do
+    state = %{
+      state
+      | count: 0,
+        show: true,
+        selection: Year
+    }
+    GenServer.cast(ui, {:set_date_display, format_date(date, true, Year)})
+    {:noreply, state}
+  end
+
+  def handle_info(:bottom_right_pressed, %{ui_pid: ui, date: date, st2: Editing, count: 0, selection: Year} = state) do
+    state = %{
+      state
+      | count: 0,
+        show: true,
+        selection: Day
+    }
+    GenServer.cast(ui, {:set_date_display, format_date(date, true, Day)})
+    {:noreply, state}
+  end
+
+  def handle_info(:bottom_right_pressed, %{ui_pid: ui, st2: Editing, count: count, show: show, date: date, selection: selection} = state) when count < 20 do
+    count = count + 1
+    show = not show
+
+    GenServer.cast(ui, {:set_date_display, format_date(date, show, selection)})
+    {:noreply, %{state | count: count, show: show}}
   end
 
   def handle_info(_event, state), do: {:noreply, state}
