@@ -46,7 +46,7 @@ defmodule JswatchWeb.ClockManager do
       selection: Day,
       show: false
     }
-
+    Process.send_after(self(), :check_editing_timeout, 250)
     GenServer.cast(ui, {:set_date_display, format_date(date, false, Day)})
     {:no_reply, state}
   end
@@ -58,6 +58,7 @@ defmodule JswatchWeb.ClockManager do
         show: true,
         selection: Month
     }
+    Process.send_after(self(), :check_editing_timeout, 250)
     GenServer.cast(ui, {:set_date_display, format_date(date, true, Month)})
     {:noreply, state}
   end
@@ -69,6 +70,7 @@ defmodule JswatchWeb.ClockManager do
         show: true,
         selection: Year
     }
+    Process.send_after(self(), :check_editing_timeout, 250)
     GenServer.cast(ui, {:set_date_display, format_date(date, true, Year)})
     {:noreply, state}
   end
@@ -80,6 +82,7 @@ defmodule JswatchWeb.ClockManager do
         show: true,
         selection: Day
     }
+    Process.send_after(self(), :check_editing_timeout, 250)
     GenServer.cast(ui, {:set_date_display, format_date(date, true, Day)})
     {:noreply, state}
   end
@@ -88,25 +91,31 @@ defmodule JswatchWeb.ClockManager do
     count = count + 1
     show = not show
 
+    Process.send_after(self(), :check_editing_timeout, 250)
     GenServer.cast(ui, {:set_date_display, format_date(date, show, selection)})
     {:noreply, %{state | count: count, show: show}}
   end
 
   def handle_info(:bottom_left_pressed, %{ui_pid: ui, st2: Editing, count: 0, selection: Day, date: date} = state) do
-    date = Date.add(date.day)
+    date = Date.add(date.day, 1)
+    Process.send_after(self(), :check_editing_timeout, 250)
     GenServer.cast(ui, {:set_date_display, format_date(date, true, Day)})
     {:noreply, %{state | date:  date, show: true}}
   end
 
   def handle_info(:bottom_left_pressed, %{ui_pid: ui, st2: Editing, count: 0, selection: Month, date: date} = state) do
-    {}
-    date = Date.add(date.day)
+    {year, month, day} = {date.year, date.month + 1, date.day}
+    {:ok, new_date} = Date.new(year + div(month - 1, 12), rem(month - 1, 12) + 1, day)
+    date = new_date
+    Process.send_after(self(), :check_editing_timeout, 250)
     GenServer.cast(ui, {:set_date_display, format_date(date, true, Month)})
     {:noreply, %{state | date:  date, show: true}}
   end
 
   def handle_info(:bottom_left_pressed, %{ui_pid: ui, st2: Editing, count: 0, selection: Year, date: date} = state) do
-    date = Date.add(date.day)
+    {:ok, new_date} = Date.new(date.year + 1, date.month, date.day)
+    date = new_date
+    Process.send_after(self(), :check_editing_timeout, 250)
     GenServer.cast(ui, {:set_date_display, format_date(date, true, Year)})
     {:noreply, %{state | date:  date, show: true}}
   end
