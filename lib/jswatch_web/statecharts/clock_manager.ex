@@ -36,6 +36,7 @@ defmodule JswatchWeb.ClockManager do
     {:noreply, state |> Map.put(:time, time) }
   end
 
+  #Changes state when bottom right button is pressed and date is in Idle
   def handle_info(:bottom_right_pressed, %{st2: Idle} = state) do
     state = %{
       state
@@ -51,6 +52,22 @@ defmodule JswatchWeb.ClockManager do
   end
 
   def handle_info(:bottom_right_pressed, %{st2: Editing, count: 0} = state) do
+    if selection == Day do
+      new_selection = Month
+    end
+    else if selection == Month do
+      new_selection = Year
+    end
+    else if selection == Year do
+      new_selection = Day
+    end
+    state = %{
+      state
+      | count: 0,
+        show: true,
+        selection: new_selection
+    }
+
   end
 
   def handle_info(_event, state), do: {:noreply, state}
